@@ -1,0 +1,23 @@
+# https://domoticproject.com/creating-raspberry-pi-service/
+
+[Unit]
+Description=Display Network Info on LCD
+After=network-online.target
+
+
+[Service]
+#Environment="SDL_FBDEV=/dev/fb1"
+ExecStart=/home/pi/infoscreen/infoscreen.py
+WorkingDirectory=/home/pi/infoscreen
+StandardOutput=inherit
+StandardError=inherit
+Restart=no
+User=pi
+StandardInput=tty
+StandardOutput=tty
+TTYPath=/dev/tty7
+ExecStartPre=/bin/chvt 7
+#ExecStop=/bin/chvt 1
+ 
+[Install]
+WantedBy=multi-user.target
