@@ -8,7 +8,7 @@ After=network-online.target
 [Service]
 #Environment="SDL_FBDEV=/dev/fb1"
 ExecStart=/home/pi/rpi-infoscreen/infoscreen.py
-WorkingDirectory=/home/pi/infoscreen
+WorkingDirectory=/home/pi/rpi-infoscreen
 StandardOutput=inherit
 StandardError=inherit
 Restart=no
