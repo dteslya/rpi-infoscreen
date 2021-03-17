@@ -30,19 +30,22 @@ def ifconfig():
             if nic in stats:
                 st = stats[nic]
                 text += "%s\n" % ("UP" if st.isup else "DOWN")
+            if nic == "wlan0":
+                ssid = ""
+                try:
+                    ssid = subprocess.check_output(
+                        "iwgetid -r", shell=True, universal_newlines=True
+                    ).strip()
+                    text += "SSID: %s\n" % ssid
+                except subprocess.CalledProcessError as e:
+                    print(e)
             for addr in addrs:
                 if addr.family in af_map:
                     text += "%s: " % af_map.get(addr.family, addr.family)
                     if addr.netmask:
                         text += "%s/%s\n" % (addr.address, addr.netmask)
                     else:
-                        text += "%s" % addr.address
-            if nic == "wlan0":
-                ssid = subprocess.check_output(
-                    "iwgetid -r", shell=True, universal_newlines=True
-                ).strip()
-                text += "\nSSID: %s\n" % ssid
-            #text += "\n"
+                        text += "%s\n" % addr.address
     return text
 
 
@@ -57,17 +60,14 @@ display_height = 320
 hostname = socket.gethostname()
 lcd = pygame.display.set_mode((display_width, display_height))
 
-logoImg = pygame.image.load('croc_logo.png')
+logoImg = pygame.image.load("croc_logo.png")
 
 while True:
     interfaces = ifconfig()
-    # text = font.render(interfaces, True, GREEN, BLUE)
     lcd.fill(BLACK)
     ptext.draw("Hostname: " + hostname, (10, 10), fontsize=48, color=WHITE)
     ptext.draw(interfaces, (10, 40), color=GREEN)
-    lcd.blit(logoImg, (display_width-100,0))
-    # lcd.blit(text, (0,0))
-    # lcd.blit(text, textRect)
+    lcd.blit(logoImg, (display_width - 100, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
