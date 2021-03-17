@@ -63,7 +63,7 @@ while True:
     interfaces = ifconfig()
     # text = font.render(interfaces, True, GREEN, BLUE)
     lcd.fill(BLACK)
-    ptext.draw("Hostname: " + hostname, (10, 10), fontsize=24, color=WHITE)
+    ptext.draw("Hostname: " + hostname, (10, 10), fontsize=48, color=WHITE)
     ptext.draw(interfaces, (10, 40), color=GREEN)
     lcd.blit(logoImg, (display_width-100,0))
     # lcd.blit(text, (0,0))
