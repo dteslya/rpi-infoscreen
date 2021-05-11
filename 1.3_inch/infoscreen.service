@@ -1,0 +1,18 @@
+# https://domoticproject.com/creating-raspberry-pi-service/
+
+[Unit]
+Description=Display Network Info on LCD
+After=network-online.target
+
+
+[Service]
+ExecStart=/home/pi/rpi-infoscreen/infoscreen.py
+WorkingDirectory=/home/pi/rpi-infoscreen
+StandardOutput=inherit
+StandardError=inherit
+Restart=no
+User=pi
+
+ 
+[Install]
+WantedBy=multi-user.target
