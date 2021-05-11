@@ -122,7 +122,7 @@ def draw_scn(channel):
     global pwdLen
     global apIndx
     with canvas(device) as draw:
-        LINE0 = subprocess.check_output('hostname', shell=True)
+        LINE0 = subprocess.check_output("hostname", shell=True)
         LINE1 = ""
         LINE2 = ""
         LINE3 = ""
@@ -165,91 +165,22 @@ def draw_scn(channel):
                 )
                 draw.rectangle((0, 61, 42, 63), outline=255, fill=0)
                 draw.rectangle((43, 61, 127, 63), outline=255, fill=1)
-        elif channel == BTN3_PIN:
-            y2 = y1 * vert
-            LINE1 = "| Shutdown..."
-            LINE2 = "| Refresh"
-            LINE3 = "| Cancel"
-
-            if vert == 1:
-                if horz == 1:
-                    LINE1 = "> Shutdown"
-                else:
-                    LINE1 = "> Reboot"
-            elif vert == 2:
-                LINE2 = "> Refresh"
-            else:
-                LINE3 = "> Cancel"
-
-            if vert == 1:
-                if horz == 1:
-                    draw.polygon(
-                        [
-                            (x4, y2 + 6),
-                            (x5, y2 - 1),
-                            (x5, y2 + 4),
-                            (x6, y2 + 4),
-                            (x6, y2 + 8),
-                            (x5, y2 + 8),
-                            (x5, y2 + 13),
-                        ],
-                        outline=255,
-                        fill=0,
-                    )
-                    draw.polygon(
-                        [
-                            (x1, y2 + 6),
-                            (x2, y2 - 1),
-                            (x2, y2 + 4),
-                            (x3, y2 + 4),
-                            (x3, y2 + 8),
-                            (x2, y2 + 8),
-                            (x2, y2 + 13),
-                        ],
-                        outline=255,
-                        fill=1,
-                    )
-                else:
-                    draw.polygon(
-                        [
-                            (x1, y2 + 6),
-                            (x2, y2 - 1),
-                            (x2, y2 + 4),
-                            (x3, y2 + 4),
-                            (x3, y2 + 8),
-                            (x2, y2 + 8),
-                            (x2, y2 + 13),
-                        ],
-                        outline=255,
-                        fill=0,
-                    )
-                    draw.polygon(
-                        [
-                            (x4, y2 + 6),
-                            (x5, y2 - 1),
-                            (x5, y2 + 4),
-                            (x6, y2 + 4),
-                            (x6, y2 + 8),
-                            (x5, y2 + 8),
-                            (x5, y2 + 13),
-                        ],
-                        outline=255,
-                        fill=1,
-                    )
-            else:
-                draw.polygon(
-                    [
-                        (x1, y2 + 6),
-                        (x2, y2 - 1),
-                        (x2, y2 + 4),
-                        (x3, y2 + 4),
-                        (x3, y2 + 8),
-                        (x2, y2 + 8),
-                        (x2, y2 + 13),
-                    ],
-                    outline=255,
-                    fill=1,
-                )
+        elif channel == BTN2_PIN:
+            # Operating mode
+            LINE1 = subprocess.check_output(
+                'qmicli -d /dev/cdc-wdm0 --dms-get-operating-mode | awk \'/Mode: /{gsub("\\047",""); printf "Status: %s", $NF}\'',
+                shell=True,
+            )
+            # Network name
+            LINE2 = subprocess.check_output(
+                'qmicli -d /dev/cdc-wdm0 --nas-get-home-network | awk \'/Description: /{gsub("\\047",""); printf "Network: %s", $NF}\'',
+                shell=True,
+            )
+            # Signal strength
+            LINE3 = subprocess.check_output(
+                'qmicli -d /dev/cdc-wdm0 --nas-get-signal-strength | awk \'/RSSI/{getline;gsub("\\047","");printf "RSSI: %s dBm", $3}\'',
+                shell=True,
+            )
         else:
             pass
 
