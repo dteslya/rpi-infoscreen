@@ -6,9 +6,10 @@ from luma.core.render import canvas
 from luma.oled.device import sh1106
 import RPi.GPIO as GPIO
 
-import sys
 import time
 import subprocess
+import psutil
+import ipaddress
 
 from PIL import Image
 from PIL import ImageDraw
@@ -44,6 +45,28 @@ x4 = x1 + 9
 x5 = x2 + 9
 x6 = x3 + 9
 
+
+def get_wg_ip():
+    ip = ""
+    mask = ""
+    for nic, addrs in psutil.net_if_addrs().items():
+        if nic == "wg0":
+            ip = addrs[0].address
+            mask = addrs[0].netmask
+    return ip, mask
+
+
+def get_wg_hub(ip, mask):
+    interface_ip = ipaddress.ip_interface(ip + "/" + mask)
+    first_ip = str(interface_ip.network[1])
+    print(first_ip)
+    return first_ip
+
+
+VPN_IP, VPN_MASK = get_wg_ip()
+
+# VPN hub IP to check connectivity
+VPN_HUB_IP = get_wg_hub(VPN_IP, VPN_MASK)
 
 # init GPIO
 GPIO.setmode(GPIO.BCM)
@@ -181,6 +204,10 @@ def draw_scn(channel):
                 'qmicli -d /dev/cdc-wdm0 --nas-get-signal-strength | awk \'/RSSI/{getline;gsub("\\047","");printf "RSSI: %s dBm", $3}\'',
                 shell=True,
             )
+        elif channel == BTN3_PIN:
+            # Check if VPN hub is reachable
+            LINE1 = "VPN Status: " + check_ping(VPN_HUB_IP)
+            LINE2 = "VPN IP: " + VPN_IP
         else:
             pass
 
@@ -258,6 +285,18 @@ def main_fun(channel):
             draw_scn(state)
 
 
+def check_ping(host):
+    response = subprocess.run(
+        ["ping", "-c1", "-W1", "-q", host], shell=False, stdout=subprocess.DEVNULL
+    )
+    if response.returncode == 0:
+        pingstatus = "OK"
+    else:
+        pingstatus = "No ping"
+    return pingstatus
+
+
+
 GPIO.add_event_detect(BTN1_PIN, GPIO.RISING, callback=main_fun, bouncetime=200)
 GPIO.add_event_detect(BTN2_PIN, GPIO.RISING, callback=main_fun, bouncetime=200)
 GPIO.add_event_detect(BTN3_PIN, GPIO.RISING, callback=main_fun, bouncetime=200)
@@ -278,7 +317,7 @@ try:
         main_fun(0)
         time.sleep(1)
 
-except:
-    print("Stopped", sys.exc_info()[0])
+except Exception as e:
+    print("Stopped", e)
     GPIO.cleanup()
     raise
